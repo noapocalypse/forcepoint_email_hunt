@@ -75,7 +75,13 @@ de_dupe_wrapped_url_subjects = list(dict.fromkeys(wrapped_url_df['Subject']))
 wrapped_sender_counter = collections.Counter(wrapped_url_df["Sender"].dropna())
 wrapped_subject_counter = collections.Counter(wrapped_url_df["Subject"].dropna())
 
-
+#This bit bangs through all the subjects and does some fuzzy matching (Levenshtein) then returns a list of subjects that had a match of 70 or more - due to stripping out the whitelisted elements first this can be sued to identify spam subject
+subjects_with_similar_subjects = []
+for a, b in tqdm(itertools.combinations(de_dupe_wrapped_url_subjects, 2)):
+    if fuzz.partial_ratio(a, b) >80:
+        subjects_with_similar_subjects.append(a)
+#de-dupe the list so we have stuff to go hunt for
+many_similar_subjects_stripped = list(dict.fromkeys(subjects_with_similar_subjects))
 
 ##/----- Aesthetic shit -----\##
 # this shit basically presents it the way it's been requested
@@ -83,7 +89,7 @@ wrapped_subject_counter = collections.Counter(wrapped_url_df["Subject"].dropna()
 
 wrapped_subjects = ["Subjects where body contains wrapped URL"] + de_dupe_wrapped_url_subjects
 lures_in_subject = ["Subjects containing lures of interest"] + subjects_containing_lures
-#fuzzy_subjects = ["Subjects that have multiple iterations"] + many_similar_subjects_stripped
+fuzzy_subjects = ["Subjects that have multiple iterations"] + many_similar_subjects_stripped
 
 def pretty_up_the_list(list_that_needs_making_pretty):
     list_that_is_formatted_ooh_so_pretty = []
@@ -98,10 +104,15 @@ ttw_subject = ["Top 20 wrapped URL senders"]+ pretty_up_the_list(wrapped_sender_
 ttw_sender = ["Top 20 wrapped URL subjects"] + pretty_up_the_list(wrapped_subject_counter.most_common(20))
 
 
+
+
 #printing out all these sweet findings to a file
 encode_wrapped = []
 for i in wrapped_subjects:
     encode_wrapped.append(i.encode('utf-8'))
+fuzzy_wrapped = []
+for i in fuzzy_subjects:
+    fuzzy_wrapped.append(i.encode('utf-8'))
 #grab date time ISO 8601 date format
 timestr = time.strftime("%Y%m%d-%Hh_%Mm_%Ss")
 
@@ -111,7 +122,7 @@ file_save_name_and_timestamp =  timestr+'_hunt_this'
 
 #chuck all the lists into the csv as columns
 with open(desktop + "\\" + file_save_name_and_timestamp+".csv", 'w') as f:
-    csv.writer(f).writerows(itertools.izip_longest(tt_subject,tt_sender,encode_wrapped,ttw_subject,ttw_sender,lures_in_subject))
+    csv.writer(f).writerows(itertools.izip_longest(tt_subject,tt_sender,fuzzy_wrapped,encode_wrapped,ttw_subject,ttw_sender,lures_in_subject))
 f.close()
 #Loads of white space\blank rows - rewriting the csv into a new one with the space removed
 input = open(desktop + "\\" + file_save_name_and_timestamp+".csv", 'rb')
