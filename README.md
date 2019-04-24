@@ -14,3 +14,5 @@ this script bodges through it and prints out a csv of email subjects and senders
 lures csv should be a single column\list of bad words to match (this is dead basic and returns any match so can catch words containing the searched for word so don't be surprised if you turn up scunthorpe or essex)
 
 whitelist should be two columns\ lists  give it a header sender, subject  then chuck in a load of sending domains\addresses and subjects that you don't mind. For now add the same amount of both. if you have extra subjects chuck a load of example.com domains in or a trusted domain. 
+
+grab shit you need from the requirements.txt but also grab python-levenshtein 
