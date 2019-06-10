@@ -65,7 +65,7 @@ sender_counter = collections.Counter(df2["Sender"].dropna())
 
 
 #Check for subjects\senders where wrapped is in the reason column
-wrapped_url_df = df2.loc[df2['Processed'].str.contains('url-wrapped')].dropna()
+wrapped_url_df = df2.loc[df2['Processed'].str.contains('url-wrapped', na=False)].dropna()
 
 #grtab a list of subjects senders adn remove duplciate
 de_dupe_wrapped_url_senders = list(dict.fromkeys(wrapped_url_df['Sender']))
